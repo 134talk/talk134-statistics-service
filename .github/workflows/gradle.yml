@@ -11,6 +11,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - run: read -d '' x << ${{ vars.TEST }}
-    - run: echo $x
-    
+    - name: strings-action
+      uses: hottestchilipepper/github-strings-action@v0.0.2
+      with:
+        # Value that the substring will be obtained from.
+        value: ${{ vars.TEST }}
+        # Function name to use.
+        func_name: replace
+        # The name of the output variable.
+        output_name: result
+        replace_str: \n
+        replace_with_str: ''
+    - run: echo $result
