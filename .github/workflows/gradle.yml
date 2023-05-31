@@ -11,5 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - run: read -d '' x | echo "${{ vars.TEST }}" && echo $x
+    - run: read -d '' x << ${{ vars.TEST }}
+    - run: echo $x
     
