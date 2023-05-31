@@ -11,4 +11,5 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - run: cat << ${{ vars.TEST }}
+    - run: echo "${{ vars.TEST }}"
+    
