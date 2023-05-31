@@ -21,6 +21,6 @@ jobs:
         func_name: replace
         # The name of the output variable.
         output_name: result
-        replace_str: "\n"
+        replace_regex: "\n"
         replace_with_str: " "
     - run: echo ${{ steps.string.outputs.result }}
