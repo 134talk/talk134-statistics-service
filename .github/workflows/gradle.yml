@@ -21,5 +21,4 @@ jobs:
         # The name of the output variable.
         output_name: result
         replace_str: \n
-        replace_with_str: ''
     - run: echo $result
