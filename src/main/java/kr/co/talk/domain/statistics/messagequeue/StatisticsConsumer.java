@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StatisticsConsumer {
 
     private final ObjectMapper objectMapper;
-    private final StatisticsRepository statisticsRepository;
+//    private final StatisticsRepository statisticsRepository;
 
     @KafkaListener(topics = KafkaConstants.TOPIC_END_CHATTING,
             groupId = KafkaConstants.GROUP_STATISTICS,
@@ -37,13 +37,13 @@ public class StatisticsConsumer {
 
         try {
             // MongoDB에 저장할 StatisticsDocument 객체 생성
-            StatisticsDocument statisticsDocument = new StatisticsDocument();
-            statisticsDocument.setRoomId(endChatroomDTO.getRoomId());
-            statisticsDocument.setName("test");
-            statisticsDocument.setEndDateTime(endChatroomDTO.getLocalDateTime());
-
-            // MongoDB에 저장
-            statisticsRepository.save(statisticsDocument);
+//            StatisticsDocument statisticsDocument = new StatisticsDocument();
+//            statisticsDocument.setRoomId(endChatroomDTO.getRoomId());
+//            statisticsDocument.setName("test");
+//            statisticsDocument.setEndDateTime(endChatroomDTO.getLocalDateTime());
+//
+//            // MongoDB에 저장
+//            statisticsRepository.save(statisticsDocument);
 
             // kafka commit
             ack.acknowledge();
