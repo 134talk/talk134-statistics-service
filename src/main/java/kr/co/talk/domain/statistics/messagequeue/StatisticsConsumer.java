@@ -1,14 +1,21 @@
 package kr.co.talk.domain.statistics.messagequeue;
 
 import java.time.LocalDateTime;
-
+import java.util.List;
+import java.util.Map;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.co.talk.domain.statistics.dto.FeedbackDto;
+import kr.co.talk.domain.statistics.model.StatisticsEntity;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.Users;
 import kr.co.talk.global.constants.KafkaConstants;
+import kr.co.talk.global.constants.RedisConstants;
+import kr.co.talk.global.service.redis.RedisService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 public class StatisticsConsumer {
 
     private final ObjectMapper objectMapper;
-//    private final StatisticsRepository statisticsRepository;
+    
+    private final DynamoDBMapper dynamoDBMapper;
+    
+    private final RedisService redisService;
 
     @KafkaListener(topics = KafkaConstants.TOPIC_END_CHATTING,
             groupId = KafkaConstants.GROUP_STATISTICS,
@@ -36,15 +46,20 @@ public class StatisticsConsumer {
                 objectMapper.readValue(kafkaMessage, KafkaEndChatroomDTO.class);
 
         try {
-            // MongoDB에 저장할 StatisticsDocument 객체 생성
-//            StatisticsDocument statisticsDocument = new StatisticsDocument();
-//            statisticsDocument.setRoomId(endChatroomDTO.getRoomId());
-//            statisticsDocument.setName("test");
-//            statisticsDocument.setEndDateTime(endChatroomDTO.getLocalDateTime());
-//
-//            // MongoDB에 저장
-//            statisticsRepository.save(statisticsDocument);
-
+            
+            long roomId = endChatroomDTO.getRoomId();
+            long userId = endChatroomDTO.getUserId();
+            
+            FeedbackDto feedbackDto = (FeedbackDto) redisService.getValueByMap(RedisConstants.FEEDBACK_ + roomId, String.valueOf(userId), FeedbackDto.class);
+            
+            StatisticsEntity statisticsEntity = new StatisticsEntity();
+            statisticsEntity.setRoomId(roomId);
+            statisticsEntity.setTeamCode("teamCode");
+            statisticsEntity.setTime(endChatroomDTO.localDateTime);
+            statisticsEntity.setUsers(feedbackDto);
+            
+            dynamoDBMapper.save(statisticsEntity);
+            
             // kafka commit
             ack.acknowledge();
         } catch (Exception e) {
@@ -59,7 +74,7 @@ public class StatisticsConsumer {
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     private static class KafkaEndChatroomDTO {
         private long roomId;
+        private long userId;
         private LocalDateTime localDateTime;
-        // TODO 메시지 보낼게 더 있을지...
     }
 }
