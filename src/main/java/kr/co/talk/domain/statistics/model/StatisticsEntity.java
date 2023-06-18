@@ -6,7 +6,11 @@ import java.util.List;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexRangeKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBKeyed;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshalling;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConvertedJson;
@@ -32,10 +36,12 @@ public class StatisticsEntity {
     @DynamoDBHashKey
     private long roomId;
 
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "team-code-idx", attributeName = "teamCode")
     private String teamCode;
 
 
     @DynamoDBTypeConverted(converter = LocalDateTimeConverter.class)
+//    @DynamoDBRangeKey
     @DynamoDBAttribute
     private LocalDateTime time; // 대화방 종료 시간
 

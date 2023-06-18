@@ -33,14 +33,15 @@ public class Talk134StatisticsServiceApplication implements ApplicationRunner {
 
         CreateTableRequest tableRequest =
                 dynamoDBMapper.generateCreateTableRequest(StatisticsEntity.class);
-        tableRequest.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
+        ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput(5L, 5L);
+        tableRequest.setProvisionedThroughput(provisionedThroughput);
+        tableRequest.getGlobalSecondaryIndexes().forEach(v -> v.setProvisionedThroughput(provisionedThroughput));
 
         boolean created = TableUtils.createTableIfNotExists(amazonDynamoDB, tableRequest);
-
         if (created) {
-            log.debug("amazonDynamoDB created table statistics");
+            log.info("amazonDynamoDB created table statistics");
         } else {
-            log.debug("amazonDynamoDB already exist table statistics");
+            log.info("amazonDynamoDB already exist table statistics");
         }
     }
 
