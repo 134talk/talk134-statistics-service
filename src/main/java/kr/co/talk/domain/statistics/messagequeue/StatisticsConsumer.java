@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.talk.domain.statistics.dto.FeedbackDto;
 import kr.co.talk.domain.statistics.model.StatisticsEntity;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.RoomEmoticon;
 import kr.co.talk.domain.statistics.model.StatisticsEntity.Users;
 import kr.co.talk.global.constants.KafkaConstants;
 import kr.co.talk.global.constants.RedisConstants;
@@ -46,6 +47,7 @@ public class StatisticsConsumer {
 
 			long roomId = endChatroomDTO.getRoomId();
 			long userId = endChatroomDTO.getUserId();
+			String teamCode = endChatroomDTO.getTeamCode();
 
 			FeedbackDto feedbackDto = (FeedbackDto) redisService.getValueByMap(RedisConstants.FEEDBACK_ + roomId,
 					String.valueOf(userId), FeedbackDto.class);
@@ -53,11 +55,15 @@ public class StatisticsConsumer {
 			StatisticsEntity loadEntity = dynamoDBMapper.load(StatisticsEntity.class, 48);
 
 			if (loadEntity == null) {
-				StatisticsEntity statisticsEntity = new StatisticsEntity();
+			    List<RoomEmoticon> emoticonList = redisService.getEmoticonList(roomId);
+			    
+			    StatisticsEntity statisticsEntity = new StatisticsEntity();
 				statisticsEntity.setRoomId(roomId);
-				statisticsEntity.setTeamCode("teamCode");
-				statisticsEntity.setTime(endChatroomDTO.localDateTime);
+				statisticsEntity.setTeamCode(teamCode);
+				statisticsEntity.setChatroomEndtime(endChatroomDTO.localDateTime);
 				statisticsEntity.setUsers(feedbackDto);
+				statisticsEntity.setEmoticonsWithRedis(emoticonList);
+				
 				dynamoDBMapper.save(statisticsEntity);
 			} else {
 				// 해당 user가 이미 dynamodb로 save되었는지 확인
@@ -88,6 +94,7 @@ public class StatisticsConsumer {
 	private static class KafkaEndChatroomDTO {
 		private long roomId;
 		private long userId;
+		private String teamCode;
 		private LocalDateTime localDateTime;
 	}
 }

@@ -11,6 +11,7 @@ import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import kr.co.talk.domain.statistics.model.StatisticsEntity;
+import kr.co.talk.domain.statistics.repository.StatisticsRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -22,7 +23,7 @@ public class Talk134StatisticsServiceApplication implements ApplicationRunner {
 
     @Autowired
     private AmazonDynamoDB amazonDynamoDB;
-
+    
     public static void main(String[] args) {
         SpringApplication.run(Talk134StatisticsServiceApplication.class, args);
     }

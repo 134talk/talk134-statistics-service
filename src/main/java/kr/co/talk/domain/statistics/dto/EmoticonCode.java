@@ -21,4 +21,10 @@ public enum EmoticonCode {
         return Stream.of(EmoticonCode.values()).filter(e -> e.getCode() == code).findFirst()
                 .orElseThrow(IllegalArgumentException::new);
     }
+    
+    public static int getCode(EmoticonCode emoticonCode) {
+        return Stream.of(EmoticonCode.values()).filter(e -> e == emoticonCode).map(e -> e.getCode())
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
+    }
 }

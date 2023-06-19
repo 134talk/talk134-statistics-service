@@ -7,24 +7,22 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexRangeKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBKeyed;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshalling;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConvertedJson;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter;
+import kr.co.talk.domain.statistics.dto.EmoticonCode;
 import kr.co.talk.domain.statistics.dto.FeedbackDto;
 import kr.co.talk.domain.statistics.dto.FeedbackDto.Feedback;
-import kr.co.talk.domain.statistics.model.StatisticsEntity.Users;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.RoomEmoticon;
 import kr.co.talk.global.constants.AppConstants;
+import kr.co.talk.global.converter.EmoticonConverter;
 import kr.co.talk.global.converter.FeedbackConverter;
 import kr.co.talk.global.converter.LocalDateTimeConverter;
 import kr.co.talk.global.converter.UsersConverter;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
@@ -41,14 +39,14 @@ public class StatisticsEntity {
 
 
     @DynamoDBTypeConverted(converter = LocalDateTimeConverter.class)
-//    @DynamoDBRangeKey
-    @DynamoDBAttribute
-    private LocalDateTime time; // 대화방 종료 시간
-
-
+    @DynamoDBAttribute(attributeName = "chatroomEndtime")
+    private LocalDateTime chatroomEndtime; // 대화방 종료 시간
+    
     private List<Users> users = new ArrayList<>();
 
-    @DynamoDBAttribute(attributeName = "users")
+    private List<RoomEmoticon> roomEmoticons = new ArrayList<>();
+    
+    @DynamoDBAttribute(attributeName = "chatroomUsers")
     @DynamoDBTypeConverted(converter = UsersConverter.class)
     public List<Users> getUsers() {
         return users;
@@ -56,6 +54,16 @@ public class StatisticsEntity {
 
     public void setUsers(List<Users> users) {
         this.users = users;
+    }
+    
+    @DynamoDBAttribute(attributeName = "emoticons")
+    @DynamoDBTypeConverted(converter = EmoticonConverter.class)
+    public List<RoomEmoticon> getRoomEmoticons() {
+        return roomEmoticons;
+    }
+    
+    public void setRoomEmoticons(List<RoomEmoticon> roomEmoticons) {
+        this.roomEmoticons = roomEmoticons;
     }
 
     @Data
@@ -80,6 +88,31 @@ public class StatisticsEntity {
         @DynamoDBTypeConverted(converter = FeedbackConverter.class)
         private List<Feedback> feedback;
     }
+    
+    /**
+     * 대화중 이모티콘을 날리면 redis에 저장하기위한 class
+     */
+    @Builder
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RoomEmoticon {
+        private EmoticonCode emoticonCode;
+        private long toUserId;
+        private long fromUserId;
+    }
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class KeywordSet {
+        private List<Long> questionCode;
+        private List<Long> keywordCode;
+    }
+
+
+    
 
     public void setUsers(FeedbackDto feedbackDto) {
         this.users.add(Users.builder()
@@ -96,6 +129,10 @@ public class StatisticsEntity {
                 .statusStressBefore(feedbackDto.getStatusStressBefore())
                 .feedback(feedbackDto.getFeedback())
                 .build());
+    }
+    
+    public void setEmoticonsWithRedis(List<RoomEmoticon> emoticonList) {
+        emoticonList.forEach(emoticon -> this.roomEmoticons.add(emoticon));
     }
 
 }

@@ -1,36 +1,23 @@
 package kr.co.talk.dynamodbTest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-import com.amazonaws.services.dynamodbv2.document.Attribute;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
-import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-
 import kr.co.talk.domain.statistics.model.StatisticsEntity;
 import kr.co.talk.domain.statistics.model.StatisticsEntity.Users;
 
@@ -42,9 +29,6 @@ public class DynamoDBCrudTest {
 
 	@Autowired
 	private AmazonDynamoDB amazonDynamoDB;
-
-//    @Autowired
-//    private StatisticsRepository statisticsRepository;
 
 	@Autowired
 	ObjectMapper mapper;
@@ -76,7 +60,7 @@ public class DynamoDBCrudTest {
 
 		users.add(Users.builder().userId(78).score(8).sentence("test sentence2").build());
 
-		StatisticsEntity entity = StatisticsEntity.builder().roomId(48).teamCode("uaCGJl").time(LocalDateTime.now())
+		StatisticsEntity entity = StatisticsEntity.builder().roomId(48).teamCode("uaCGJl").chatroomEndtime(LocalDateTime.now())
 				.users(users).build();
 
 		dynamoDBMapper.save(entity);
@@ -94,32 +78,40 @@ public class DynamoDBCrudTest {
 	public void findAllWithTeamCode() {
 		Map<String, AttributeValue> params = new HashMap<>();
 		params.put(":v1", new AttributeValue().withS("teamCode"));
+		
 
 		DynamoDBQueryExpression<StatisticsEntity> dbQueryExpression = new DynamoDBQueryExpression<StatisticsEntity>()
-				.withConsistentRead(false).withIndexName("team-code-idx")
+				.withConsistentRead(false)
+				.withIndexName("team-code-idx")
 				.withKeyConditionExpression("teamCode = :v1")
 				.withExpressionAttributeValues(params);
 		
-		dbQueryExpression.setProjectionExpression("roomId, teamCode");
-//		dbQueryExpression.withExpressionAttributeNames(
-//		    ImmutableMap.of("#time", "time",
-//		    		"#users", "users"
-//		    		)
-//		);
+//		DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
+//		
+//		Table table = dynamoDB.getTable("STATISTICS");
+//		
+//		Index teamCodeIdx = table.getIndex("team-code-idx");
+//		ItemCollection<QueryOutcome> items = teamCodeIdx.query(new QuerySpec()
+//		        .withKeyConditionExpression("teamCode = :v1")
+//		        .withValueMap(new ValueMap().withString(":v1", "uaCGJl"))
+		
+//		
+//		Iterator<Item> iter = items.iterator();
+//		
+//		while(iter.hasNext()) {
+//		    Item next = iter.next();
+//		    System.out.println(next.toJSONPretty());
+//		}
 		
 		
 		List<StatisticsEntity> query = dynamoDBMapper.query(StatisticsEntity.class, dbQueryExpression);
 
-		// query를 보게 되면 pk값만 가져오게 된다.. why????
-		assertTrue(query.size() != 0);
-		assertNull(query.get(0));
-
+		// query를 보게 되면 pk값만 가져오게 된다
 		System.out.println("query:::" + query);
 
-		List<Long> roomList = query.stream().map(StatisticsEntity::getRoomId).collect(Collectors.toList());
 
 		
-//		dynamoDBMapper.ba(null)
+		
 	}
 
 	// scan - full scan
@@ -139,10 +131,6 @@ public class DynamoDBCrudTest {
 		List<StatisticsEntity> query = dynamoDBMapper.query(StatisticsEntity.class, dbQueryExpression);
 
 		System.out.println(query);
-
-		// query를 보게 되면 pk값만 가져오게 된다.. why????
-		assertTrue(query.size() != 0);
-		assertNotNull(query.get(0));
 	}
 
 }

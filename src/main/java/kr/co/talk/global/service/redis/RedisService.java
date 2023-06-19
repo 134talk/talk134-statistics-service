@@ -5,7 +5,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import kr.co.talk.domain.statistics.dto.RoomEmoticon;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.KeywordSet;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.RoomEmoticon;
 import kr.co.talk.global.constants.RedisConstants;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
@@ -85,6 +86,20 @@ public class RedisService {
 
     }
 
+    public List<KeywordSet> getKeywordSet(long chatroomId, long userId) {
+        String key = chatroomId + "_" + userId + RedisConstants.QUESTION;
+        List<String> keywordSetList =   opsForList.size(key) == 0 ? new ArrayList<>() : opsForList.range(key, 0, -1);
+    
+        return keywordSetList.stream().map(s -> {
+            try {
+                return objectMapper.readValue(s, KeywordSet.class);
+            } catch (JsonProcessingException e) {
+                log.error("json parse error", e);
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
+
+    }
 
     public void pushMap(String key, String fieldKey, Object value) {
         try {
