@@ -71,7 +71,7 @@ public class RedisService {
     }
 
     public List<RoomEmoticon> getEmoticonList(long chatroomId) {
-        String key = chatroomId + RedisConstants.ROOM_EMOTICON;
+        String key = chatroomId + RedisConstants._ROOM_EMOTICON;
         List<String> emoticonList =
                 opsForList.size(key) == 0 ? new ArrayList<>() : opsForList.range(key, 0, -1);
 
@@ -86,19 +86,15 @@ public class RedisService {
 
     }
 
-    public List<KeywordSet> getKeywordSet(long chatroomId, long userId) {
-        String key = chatroomId + "_" + userId + RedisConstants.QUESTION;
-        List<String> keywordSetList =   opsForList.size(key) == 0 ? new ArrayList<>() : opsForList.range(key, 0, -1);
-    
-        return keywordSetList.stream().map(s -> {
-            try {
-                return objectMapper.readValue(s, KeywordSet.class);
-            } catch (JsonProcessingException e) {
-                log.error("json parse error", e);
-                throw new RuntimeException(e);
-            }
-        }).collect(Collectors.toList());
+    public KeywordSet getKeywordSet(long chatroomId, long userId) {
+        String key = chatroomId + "_" + userId + RedisConstants._QUESTION;
 
+        try {
+            return objectMapper.readValue(valueOps.get(key), KeywordSet.class);
+        } catch (JsonProcessingException e) {
+            log.error("json parse error", e);
+            throw new RuntimeException(e);
+        }
     }
 
     public void pushMap(String key, String fieldKey, Object value) {
@@ -136,6 +132,16 @@ public class RedisService {
 
     public void deleteMap(String key, String fieldKey) {
         opsForMap.delete(key, fieldKey);
+    }
+
+    public void deleteAll(String roomId, long userId) {
+        String questionKey = roomId + "_" + userId + RedisConstants._QUESTION;
+        String emoticonKey = roomId + RedisConstants._ROOM_EMOTICON;
+        String feedbackKey = RedisConstants.FEEDBACK_ + roomId;
+
+        redisTemplate.delete(questionKey);
+        redisTemplate.delete(emoticonKey);
+        opsForMap.delete(feedbackKey, String.valueOf(userId));
     }
 
 

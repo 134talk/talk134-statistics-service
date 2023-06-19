@@ -12,10 +12,10 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 import kr.co.talk.domain.statistics.dto.EmoticonCode;
 import kr.co.talk.domain.statistics.dto.FeedbackDto;
 import kr.co.talk.domain.statistics.dto.FeedbackDto.Feedback;
-import kr.co.talk.domain.statistics.model.StatisticsEntity.RoomEmoticon;
 import kr.co.talk.global.constants.AppConstants;
 import kr.co.talk.global.converter.EmoticonConverter;
 import kr.co.talk.global.converter.FeedbackConverter;
+import kr.co.talk.global.converter.KeywordConverter;
 import kr.co.talk.global.converter.LocalDateTimeConverter;
 import kr.co.talk.global.converter.UsersConverter;
 import lombok.AccessLevel;
@@ -41,11 +41,13 @@ public class StatisticsEntity {
     @DynamoDBTypeConverted(converter = LocalDateTimeConverter.class)
     @DynamoDBAttribute(attributeName = "chatroomEndtime")
     private LocalDateTime chatroomEndtime; // 대화방 종료 시간
-    
+
     private List<Users> users = new ArrayList<>();
 
     private List<RoomEmoticon> roomEmoticons = new ArrayList<>();
-    
+
+    private KeywordSet keywordSet;
+
     @DynamoDBAttribute(attributeName = "chatroomUsers")
     @DynamoDBTypeConverted(converter = UsersConverter.class)
     public List<Users> getUsers() {
@@ -55,16 +57,28 @@ public class StatisticsEntity {
     public void setUsers(List<Users> users) {
         this.users = users;
     }
-    
+
     @DynamoDBAttribute(attributeName = "emoticons")
     @DynamoDBTypeConverted(converter = EmoticonConverter.class)
     public List<RoomEmoticon> getRoomEmoticons() {
         return roomEmoticons;
     }
-    
+
     public void setRoomEmoticons(List<RoomEmoticon> roomEmoticons) {
         this.roomEmoticons = roomEmoticons;
     }
+
+    @DynamoDBAttribute(attributeName = "keywordSet")
+    @DynamoDBTypeConverted(converter = KeywordConverter.class)
+    public KeywordSet getKeywordSet() {
+        return keywordSet;
+    }
+
+    public void setKeywordSet(KeywordSet keywordSet) {
+        this.keywordSet = keywordSet;
+    }
+
+
 
     @Data
     @NoArgsConstructor
@@ -88,7 +102,7 @@ public class StatisticsEntity {
         @DynamoDBTypeConverted(converter = FeedbackConverter.class)
         private List<Feedback> feedback;
     }
-    
+
     /**
      * 대화중 이모티콘을 날리면 redis에 저장하기위한 class
      */
@@ -101,7 +115,7 @@ public class StatisticsEntity {
         private long toUserId;
         private long fromUserId;
     }
-    
+
     @Data
     @Builder
     @NoArgsConstructor
@@ -112,7 +126,6 @@ public class StatisticsEntity {
     }
 
 
-    
 
     public void setUsers(FeedbackDto feedbackDto) {
         this.users.add(Users.builder()
@@ -130,7 +143,7 @@ public class StatisticsEntity {
                 .feedback(feedbackDto.getFeedback())
                 .build());
     }
-    
+
     public void setEmoticonsWithRedis(List<RoomEmoticon> emoticonList) {
         emoticonList.forEach(emoticon -> this.roomEmoticons.add(emoticon));
     }

@@ -12,8 +12,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.talk.domain.statistics.dto.FeedbackDto;
 import kr.co.talk.domain.statistics.model.StatisticsEntity;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.KeywordSet;
 import kr.co.talk.domain.statistics.model.StatisticsEntity.RoomEmoticon;
 import kr.co.talk.domain.statistics.model.StatisticsEntity.Users;
+import kr.co.talk.global.client.UserClient;
 import kr.co.talk.global.constants.KafkaConstants;
 import kr.co.talk.global.constants.RedisConstants;
 import kr.co.talk.global.service.redis.RedisService;
@@ -36,6 +38,8 @@ public class StatisticsConsumer {
 
 	private final RedisService redisService;
 
+	private final UserClient userClient;
+	
 	@KafkaListener(topics = KafkaConstants.TOPIC_END_CHATTING, groupId = KafkaConstants.GROUP_STATISTICS, containerFactory = "concurrentKafkaListenerContainerFactory")
 	public void endChatting(String kafkaMessage, Acknowledgment ack)
 			throws JsonMappingException, JsonProcessingException {
@@ -47,7 +51,6 @@ public class StatisticsConsumer {
 
 			long roomId = endChatroomDTO.getRoomId();
 			long userId = endChatroomDTO.getUserId();
-			String teamCode = endChatroomDTO.getTeamCode();
 
 			FeedbackDto feedbackDto = (FeedbackDto) redisService.getValueByMap(RedisConstants.FEEDBACK_ + roomId,
 					String.valueOf(userId), FeedbackDto.class);
@@ -56,6 +59,9 @@ public class StatisticsConsumer {
 
 			if (loadEntity == null) {
 			    List<RoomEmoticon> emoticonList = redisService.getEmoticonList(roomId);
+			    KeywordSet keywordSet = redisService.getKeywordSet(roomId, userId);
+			    
+			    String teamCode = userClient.findTeamCode(userId).getTeamCode();
 			    
 			    StatisticsEntity statisticsEntity = new StatisticsEntity();
 				statisticsEntity.setRoomId(roomId);
@@ -63,6 +69,7 @@ public class StatisticsConsumer {
 				statisticsEntity.setChatroomEndtime(endChatroomDTO.localDateTime);
 				statisticsEntity.setUsers(feedbackDto);
 				statisticsEntity.setEmoticonsWithRedis(emoticonList);
+				statisticsEntity.setKeywordSet(keywordSet);
 				
 				dynamoDBMapper.save(statisticsEntity);
 			} else {
@@ -79,6 +86,8 @@ public class StatisticsConsumer {
 				}
 			}
 
+			redisService.deleteAll(String.valueOf(roomId), userId);
+			
 			// kafka commit
 			ack.acknowledge();
 		} catch (Exception e) {
@@ -94,7 +103,6 @@ public class StatisticsConsumer {
 	private static class KafkaEndChatroomDTO {
 		private long roomId;
 		private long userId;
-		private String teamCode;
 		private LocalDateTime localDateTime;
 	}
 }
