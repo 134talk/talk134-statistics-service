@@ -3,7 +3,7 @@
 TALK134_HOME=/home/ubuntu/deploy/statistics-service
 JAR_PATH=`find $TALK134_HOME -name talk134-statistics-service*.jar`
 
-PID=`ps -ef | grep talk134-statistics-service*.jar | grep -v grep | awk '{print $2}'`
+PID=`ps -ef | grep talk134-statistics-service | grep java | grep jar | grep -v grep | awk '{print $2}'`
 echo "process is $PID"
 echo "jar_path is $JAR_PATH"
 
@@ -12,6 +12,7 @@ then
   echo "Process is not running"
 else
 kill -15 $PID
+tail --pid=$PID -f /dev/null
 fi
 
 echo "start~"
