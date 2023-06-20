@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TALK134_HOME=/home/ubuntu/deploy/statistics-service
+TALK134_HOME=/home/ec2-user/deploy/statistics-service
 JAR_PATH=`find $TALK134_HOME -name talk134-statistics-service*.jar`
 
 PID=`ps -ef | grep talk134-statistics-service | grep java | grep jar | grep -v grep | awk '{print $2}'`
