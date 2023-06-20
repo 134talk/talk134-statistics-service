@@ -1,14 +1,24 @@
 package kr.co.talk.domain.statistics.messagequeue;
 
 import java.time.LocalDateTime;
-
+import java.util.List;
+import java.util.Map;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.co.talk.domain.statistics.dto.FeedbackDto;
+import kr.co.talk.domain.statistics.model.StatisticsEntity;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.KeywordSet;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.RoomEmoticon;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.Users;
+import kr.co.talk.global.client.UserClient;
 import kr.co.talk.global.constants.KafkaConstants;
+import kr.co.talk.global.constants.RedisConstants;
+import kr.co.talk.global.service.redis.RedisService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,44 +32,77 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StatisticsConsumer {
 
-    private final ObjectMapper objectMapper;
-//    private final StatisticsRepository statisticsRepository;
+	private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = KafkaConstants.TOPIC_END_CHATTING,
-            groupId = KafkaConstants.GROUP_STATISTICS,
-            containerFactory = "concurrentKafkaListenerContainerFactory")
-    public void endChatting(String kafkaMessage, Acknowledgment ack)
-            throws JsonMappingException, JsonProcessingException {
-        log.info("Received Msg statistics server, message : {}", kafkaMessage);
+	private final DynamoDBMapper dynamoDBMapper;
 
-        KafkaEndChatroomDTO endChatroomDTO =
-                objectMapper.readValue(kafkaMessage, KafkaEndChatroomDTO.class);
+	private final RedisService redisService;
 
-        try {
-            // MongoDB에 저장할 StatisticsDocument 객체 생성
-//            StatisticsDocument statisticsDocument = new StatisticsDocument();
-//            statisticsDocument.setRoomId(endChatroomDTO.getRoomId());
-//            statisticsDocument.setName("test");
-//            statisticsDocument.setEndDateTime(endChatroomDTO.getLocalDateTime());
-//
-//            // MongoDB에 저장
-//            statisticsRepository.save(statisticsDocument);
+	private final UserClient userClient;
+	
+	@KafkaListener(topics = KafkaConstants.TOPIC_END_CHATTING, groupId = KafkaConstants.GROUP_STATISTICS, containerFactory = "concurrentKafkaListenerContainerFactory")
+	public void endChatting(String kafkaMessage, Acknowledgment ack)
+			throws JsonMappingException, JsonProcessingException {
+		log.info("Received Msg statistics server, message : {}", kafkaMessage);
 
-            // kafka commit
-            ack.acknowledge();
-        } catch (Exception e) {
-            log.error("acknowledge error : {}", e);
-        }
+		KafkaEndChatroomDTO endChatroomDTO = objectMapper.readValue(kafkaMessage, KafkaEndChatroomDTO.class);
 
-    }
+		try {
 
-    @Builder
-    @Data
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    @AllArgsConstructor(access = AccessLevel.PROTECTED)
-    private static class KafkaEndChatroomDTO {
-        private long roomId;
-        private LocalDateTime localDateTime;
-        // TODO 메시지 보낼게 더 있을지...
-    }
+			long roomId = endChatroomDTO.getRoomId();
+			long userId = endChatroomDTO.getUserId();
+
+			FeedbackDto feedbackDto = (FeedbackDto) redisService.getValueByMap(RedisConstants.FEEDBACK_ + roomId,
+					String.valueOf(userId), FeedbackDto.class);
+
+			StatisticsEntity loadEntity = dynamoDBMapper.load(StatisticsEntity.class, 48);
+
+			if (loadEntity == null) {
+			    List<RoomEmoticon> emoticonList = redisService.getEmoticonList(roomId);
+			    KeywordSet keywordSet = redisService.getKeywordSet(roomId, userId);
+			    
+			    String teamCode = userClient.findTeamCode(userId).getTeamCode();
+			    
+			    StatisticsEntity statisticsEntity = new StatisticsEntity();
+				statisticsEntity.setRoomId(roomId);
+				statisticsEntity.setTeamCode(teamCode);
+				statisticsEntity.setChatroomEndtime(endChatroomDTO.localDateTime);
+				statisticsEntity.setUsers(feedbackDto);
+				statisticsEntity.setEmoticonsWithRedis(emoticonList);
+				statisticsEntity.setKeywordSet(keywordSet);
+				
+				dynamoDBMapper.save(statisticsEntity);
+			} else {
+				// 해당 user가 이미 dynamodb로 save되었는지 확인
+				boolean alreadyCommitted = loadEntity.getUsers().stream()
+						.map(Users::getUserId)
+						.filter(id -> id == feedbackDto.getUserId())
+						.findAny()
+						.isPresent();
+
+				if(!alreadyCommitted) {
+					loadEntity.setUsers(feedbackDto);
+					dynamoDBMapper.save(loadEntity);
+				}
+			}
+
+			redisService.deleteAll(String.valueOf(roomId), userId);
+			
+			// kafka commit
+			ack.acknowledge();
+		} catch (Exception e) {
+			log.error("acknowledge error : {}", e);
+		}
+
+	}
+
+	@Builder
+	@Data
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PROTECTED)
+	private static class KafkaEndChatroomDTO {
+		private long roomId;
+		private long userId;
+		private LocalDateTime localDateTime;
+	}
 }

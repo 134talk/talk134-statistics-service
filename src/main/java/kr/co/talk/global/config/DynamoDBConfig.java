@@ -14,7 +14,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 
 @Configuration
-@EnableDynamoDBRepositories
+@EnableDynamoDBRepositories(basePackages = "kr.co.talk.domain.repository")
 public class DynamoDBConfig {
 
 	@Value("${amazon.dynamodb.endpoint}")
