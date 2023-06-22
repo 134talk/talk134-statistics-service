@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -132,5 +133,36 @@ public class DynamoDBCrudTest {
 
 		System.out.println(query);
 	}
+	
+	@Test
+	@DisplayName("리포트 상세 조회")
+	public void reportDetailTest() {
+        List<StatisticsEntity> statisticsEntityList = new ArrayList<>();
+        String teamCode = "uaCGJl";
+        
+        Map<String, AttributeValue> params = new HashMap<>();
+        params.put(":v1", new AttributeValue().withS(teamCode));
+
+
+        DynamoDBQueryExpression<StatisticsEntity> dbQueryExpression =
+                new DynamoDBQueryExpression<StatisticsEntity>()
+                        .withConsistentRead(false)
+                        .withIndexName("team-code-idx")
+                        .withKeyConditionExpression("teamCode = :v1")
+                        .withExpressionAttributeValues(params);
+
+        List<StatisticsEntity> queryByGsi =
+                dynamoDBMapper.query(StatisticsEntity.class, dbQueryExpression);
+
+        List<Long> roomIds =
+                queryByGsi.stream().map(StatisticsEntity::getRoomId).collect(Collectors.toList());
+
+        roomIds.forEach(
+                rid -> statisticsEntityList.add(dynamoDBMapper.load(StatisticsEntity.class, rid)));
+        
+        System.out.println("statisticsEntityList:::"+statisticsEntityList);
+        
+	}
+
 
 }
