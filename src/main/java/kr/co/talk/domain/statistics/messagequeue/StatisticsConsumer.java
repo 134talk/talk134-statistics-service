@@ -2,13 +2,11 @@ package kr.co.talk.domain.statistics.messagequeue;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.talk.domain.statistics.dto.FeedbackDto;
 import kr.co.talk.domain.statistics.model.StatisticsEntity;
@@ -42,7 +40,7 @@ public class StatisticsConsumer {
 	
 	@KafkaListener(topics = KafkaConstants.TOPIC_END_CHATTING, groupId = KafkaConstants.GROUP_STATISTICS, containerFactory = "concurrentKafkaListenerContainerFactory")
 	public void endChatting(String kafkaMessage, Acknowledgment ack)
-			throws JsonMappingException, JsonProcessingException {
+			throws JsonProcessingException {
 		log.info("Received Msg statistics server, message : {}", kafkaMessage);
 
 		KafkaEndChatroomDTO endChatroomDTO = objectMapper.readValue(kafkaMessage, KafkaEndChatroomDTO.class);
@@ -76,9 +74,7 @@ public class StatisticsConsumer {
 				// 해당 user가 이미 dynamodb로 save되었는지 확인
 				boolean alreadyCommitted = loadEntity.getUsers().stream()
 						.map(Users::getUserId)
-						.filter(id -> id == feedbackDto.getUserId())
-						.findAny()
-						.isPresent();
+						.anyMatch(id -> id == feedbackDto.getUserId());
 
 				if(!alreadyCommitted) {
 					loadEntity.setUsers(feedbackDto);
@@ -91,7 +87,7 @@ public class StatisticsConsumer {
 			// kafka commit
 			ack.acknowledge();
 		} catch (Exception e) {
-			log.error("acknowledge error : {}", e);
+			log.error(e.getMessage(), e);
 		}
 
 	}

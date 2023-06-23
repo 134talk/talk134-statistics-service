@@ -1,12 +1,12 @@
 package kr.co.talk.domain.statistics.dto;
 
-import java.io.Serializable;
-import java.util.List;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 피드백 필수값 DTO
@@ -26,11 +26,6 @@ public class FeedbackDto implements Serializable {
 	private int statusRelation;
 	private int statusStress;
 	private int statusStable;
-
-	private int statusEnergyBefore;
-	private int statusRelationBefore;
-	private int statusStressBefore;
-	private int statusStableBefore;
 
 	private List<Feedback> feedback;
 
