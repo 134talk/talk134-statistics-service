@@ -23,34 +23,26 @@ public class StatisticsService {
         long totalStatusRelation = 0;
         long totalStatusStress = 0;
         long totalStatusStable = 0;
-        long totalStatusEnergyBefore = 0;
-        long totalStatusRelationBefore = 0;
-        long totalStatusStressBefore = 0;
-        long totalStatusStableBefore = 0;
 
         for (Users user : users) {
             totalStatusEnergy += user.getStatusEnergy();
-            totalStatusEnergyBefore += user.getStatusEnergyBefore();
             totalStatusRelation += user.getStatusRelation();
-            totalStatusRelationBefore += user.getStatusRelationBefore();
             totalStatusStress += user.getStatusStress();
-            totalStatusStressBefore += user.getStatusStressBefore();
             totalStatusStable += user.getStatusStable();
-            totalStatusStableBefore += user.getStatusStableBefore();
         }
 
         return FeedbackReportDetailDto.builder()
-                .energyPercent(percent(totalStatusEnergyBefore, totalStatusEnergy, totalSize))
-                .relationPercent(percent(totalStatusRelationBefore, totalStatusRelation, totalSize))
-                .stressPercent(percent(totalStatusStressBefore, totalStatusStress, totalSize))
-                .stablePercent(percent(totalStatusStableBefore, totalStatusStable, totalSize))
+                .energyPercent(percent(totalStatusEnergy, totalSize))
+                .relationPercent(percent(totalStatusRelation, totalSize))
+                .stressPercent(percent(totalStatusStress, totalSize))
+                .stablePercent(percent(totalStatusStable, totalSize))
                 .build();
- 
+
 
     }
 
-    private int percent(long before, long current, int size) {
-        return (int) ((current - before) / size / before * 100) ;
+    private int percent(long current, int size) {
+        return (int) (current / size);
     }
 
 }

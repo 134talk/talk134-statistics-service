@@ -93,10 +93,6 @@ public class StatisticsEntity {
         private int statusRelation;
         private int statusStress;
         private int statusStable;
-        private int statusEnergyBefore;
-        private int statusRelationBefore;
-        private int statusStressBefore;
-        private int statusStableBefore;
 
         @DynamoDBAttribute
         @DynamoDBTypeConverted(converter = FeedbackConverter.class)
@@ -133,13 +129,9 @@ public class StatisticsEntity {
                 .score(feedbackDto.getScore())
                 .sentence(feedbackDto.getSentence())
                 .statusEnergy(feedbackDto.getStatusEnergy())
-                .statusEnergyBefore(feedbackDto.getStatusEnergyBefore())
                 .statusRelation(feedbackDto.getStatusRelation())
-                .statusRelationBefore(feedbackDto.getStatusRelationBefore())
                 .statusStable(feedbackDto.getStatusStable())
-                .statusStableBefore(feedbackDto.getStatusStableBefore())
                 .statusStress(feedbackDto.getStatusStress())
-                .statusStressBefore(feedbackDto.getStatusStressBefore())
                 .feedback(feedbackDto.getFeedback())
                 .build());
     }
