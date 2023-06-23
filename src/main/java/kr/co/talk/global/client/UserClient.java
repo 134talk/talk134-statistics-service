@@ -9,5 +9,5 @@ import kr.co.talk.global.config.FeignLoggingConfig;
 @FeignClient(name = "USER-SERVICE", configuration = FeignLoggingConfig.class)
 public interface UserClient {
     @GetMapping("/user/findTeamCode/{userId}")
-    public TeamCodeResponseDto findTeamCode(@PathVariable("userId") long userId);
+    TeamCodeResponseDto findTeamCode(@PathVariable("userId") long userId);
 }
