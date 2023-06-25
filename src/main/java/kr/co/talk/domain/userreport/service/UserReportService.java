@@ -2,10 +2,12 @@ package kr.co.talk.domain.userreport.service;
 
 import kr.co.talk.domain.statistics.model.StatisticsEntity;
 import kr.co.talk.domain.statistics.repository.StatisticsRepository;
+import kr.co.talk.domain.userreport.dto.DetailedUserReportDto;
 import kr.co.talk.domain.userreport.dto.UserReportDateListDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,11 @@ public class UserReportService {
 
         return UserReportDateListDto.builder()
                 .myReportList(dateSet)
+                .build();
+    }
+
+    public DetailedUserReportDto getDetailedUserReport(long userId, LocalDate date) {
+        return DetailedUserReportDto.builder()
                 .build();
     }
 }
