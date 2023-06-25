@@ -1,10 +1,8 @@
 package kr.co.talk.domain.statistics.controller;
 
+import kr.co.talk.domain.statistics.dto.NicknameRankingResponseDto;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import kr.co.talk.domain.statistics.dto.FeedbackReportDetailDto;
 import kr.co.talk.domain.statistics.repository.StatisticsRepository;
 import kr.co.talk.domain.statistics.service.StatisticsService;
@@ -22,5 +20,10 @@ public class StatisticsController {
     @GetMapping("/feedback/detail/{teamCode}")
     public ResponseEntity<?> feedbackDetail(@PathVariable("teamCode") String teamCode) {
         return ResponseEntity.ok(statisticsService.feedbackDetail(teamCode));
+    }
+
+    @GetMapping("/team/character/{teamCode}")
+    public NicknameRankingResponseDto teamCharacter(@PathVariable("teamCode") String teamCode) {
+        return statisticsService.nicknameRankingResponseDto(teamCode);
     }
 }
