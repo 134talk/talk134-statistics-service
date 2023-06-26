@@ -34,6 +34,7 @@ import kr.co.talk.domain.statistics.model.StatisticsEntity.KeywordSet;
 import kr.co.talk.domain.statistics.model.StatisticsEntity.RoomEmoticon;
 import kr.co.talk.domain.statistics.model.StatisticsEntity.Users;
 import kr.co.talk.domain.statistics.repository.StatisticsRepository;
+import kr.co.talk.global.client.ChatClient;
 
 @SpringBootTest
 public class DynamoDBCrudTest {
@@ -49,6 +50,9 @@ public class DynamoDBCrudTest {
 
 	@Autowired
 	ObjectMapper mapper;
+	
+	@Autowired
+	private ChatClient chatClient;
 
 	@BeforeEach
 	public void setup() throws Exception {
@@ -209,6 +213,7 @@ public class DynamoDBCrudTest {
 				.stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(3).map(entry -> {
 					ChatlogDetailEmoticon chatlogDetailEmoticon = new ChatlogDetailEmoticon();
 					chatlogDetailEmoticon.setCode(entry.getKey().getCode());
+					chatlogDetailEmoticon.setName(entry.getKey().getName());
 					chatlogDetailEmoticon.setScore((int) (entry.getValue() * 100 / roomEmoticon.size()));
 					return chatlogDetailEmoticon;
 				}).collect(Collectors.toList());
@@ -234,7 +239,7 @@ public class DynamoDBCrudTest {
 		ChatlogDetailDto build = ChatlogDetailDto.builder()
 		.emoticonScore(collect)
 		.keywordScore(collect2)
-		.questionList(collect3)
+		.questionList(chatClient.keywordName(collect3))
 		.build();
 		
 		System.out.println("build:::"+build);

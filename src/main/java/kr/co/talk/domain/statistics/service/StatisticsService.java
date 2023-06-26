@@ -1,12 +1,20 @@
 package kr.co.talk.domain.statistics.service;
 
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import kr.co.talk.domain.statistics.dto.NicknameRankingResponseDto;
+import kr.co.talk.domain.statistics.dto.ChatlogDetailDto.ChatlogDetailEmoticon;
+import kr.co.talk.domain.statistics.dto.ChatlogDetailDto.ChatlogDetailKeyword;
+import kr.co.talk.global.client.ChatClient;
 import kr.co.talk.global.client.UserClient;
 import org.springframework.stereotype.Service;
+import kr.co.talk.domain.statistics.dto.ChatlogDetailDto;
 import kr.co.talk.domain.statistics.dto.FeedbackReportDetailDto;
+import kr.co.talk.domain.statistics.model.StatisticsEntity;
+import kr.co.talk.domain.statistics.model.StatisticsEntity.RoomEmoticon;
 import kr.co.talk.domain.statistics.model.StatisticsEntity.Users;
 import kr.co.talk.domain.statistics.repository.StatisticsRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +27,7 @@ public class StatisticsService {
 
     private final StatisticsRepository statisticsRepository;
     private final UserClient userClient;
+    private final ChatClient chatClient;
 
     public FeedbackReportDetailDto feedbackDetail(String teamCode) {
         List<Users> users = statisticsRepository.getUsers(teamCode);
@@ -179,5 +188,57 @@ public class StatisticsService {
             value = "변화/해결";
         }
         return value;
+    }
+    
+    
+    /**
+     * 대화기록 리포트 상세 조회
+     * @param teamCode
+     */
+    public ChatlogDetailDto reportChatlog(String teamCode) {
+        List<RoomEmoticon> roomEmoticon = new ArrayList<>();
+        List<Long> keywordCode = new ArrayList<>();
+        List<Long> questionCode = new ArrayList<>();
+    
+        List<StatisticsEntity> statisticsListByTeamCode = statisticsRepository.getStatisticsListByTeamCode(teamCode);
+
+        statisticsListByTeamCode.forEach(se -> {
+            keywordCode.addAll(se.getKeywordSet().getKeywordCode());
+            questionCode.addAll(se.getKeywordSet().getQuestionCode());
+            roomEmoticon.addAll(se.getRoomEmoticons());
+        });
+
+        List<ChatlogDetailEmoticon> collect = roomEmoticon.stream()
+                .collect(Collectors.groupingBy(RoomEmoticon::getEmoticonCode, Collectors.counting())).entrySet()
+                .stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(3).map(entry -> {
+                    ChatlogDetailEmoticon chatlogDetailEmoticon = new ChatlogDetailEmoticon();
+                    chatlogDetailEmoticon.setCode(entry.getKey().getCode());
+                    chatlogDetailEmoticon.setName(entry.getKey().getName());
+                    chatlogDetailEmoticon.setScore((int) (entry.getValue() * 100 / roomEmoticon.size()));
+                    return chatlogDetailEmoticon;
+                }).collect(Collectors.toList());
+
+        List<ChatlogDetailKeyword> collect2 = keywordCode.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet()
+                .stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(3).map(entry -> {
+                    ChatlogDetailKeyword chatlogDetailKeyword = new ChatlogDetailKeyword();
+                    chatlogDetailKeyword.setCode(Integer.valueOf(entry.getKey().toString()));
+                    chatlogDetailKeyword.setScore((int) (entry.getValue() * 100 / keywordCode.size()));
+                    return chatlogDetailKeyword;
+                }).collect(Collectors.toList());
+        
+        
+        List<Long> collect3 = questionCode.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet()
+                .stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(3)
+                .map(Entry::getKey)
+                .collect(Collectors.toList());
+        
+        return ChatlogDetailDto.builder()
+                .emoticonScore(collect)
+                .keywordScore(collect2)
+                .questionList(chatClient.keywordName(collect3))
+                .build();
     }
 }

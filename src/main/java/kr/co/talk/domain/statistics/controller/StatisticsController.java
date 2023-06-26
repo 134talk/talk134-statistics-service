@@ -17,6 +17,12 @@ public class StatisticsController {
 
     private final StatisticsService statisticsService;
 
+    /**
+     * 피드백 리포트 상세 조회 api
+     * 
+     * @param teamCode
+     * @return
+     */
     @GetMapping("/feedback/detail/{teamCode}")
     public ResponseEntity<?> feedbackDetail(@PathVariable("teamCode") String teamCode) {
         return ResponseEntity.ok(statisticsService.feedbackDetail(teamCode));
@@ -25,5 +31,10 @@ public class StatisticsController {
     @GetMapping("/team/character/{teamCode}")
     public NicknameRankingResponseDto teamCharacter(@PathVariable("teamCode") String teamCode) {
         return statisticsService.nicknameRankingResponseDto(teamCode);
+    }
+    
+    @GetMapping("/report/chatlog/{teamCode}")
+    public ResponseEntity<?> reportChatlog(@PathVariable("teamCode") String teamCode){
+        return ResponseEntity.ok(statisticsService.reportChatlog(teamCode));
     }
 }

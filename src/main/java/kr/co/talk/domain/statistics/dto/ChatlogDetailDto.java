@@ -23,7 +23,7 @@ public class ChatlogDetailDto {
 	
 	private List<ChatlogDetailKeyword> keywordScore;
 	
-	private List<Long> questionList;
+	private List<String> questionList;
 
 	@Data
 	@Builder
@@ -31,6 +31,7 @@ public class ChatlogDetailDto {
 	@AllArgsConstructor
 	public static class ChatlogDetailEmoticon {
 		private int code;
+		private String name;
 		private int score;
 	}
 	
