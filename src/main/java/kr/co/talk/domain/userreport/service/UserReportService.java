@@ -79,15 +79,6 @@ public class UserReportService {
             });
         });
 
-        feedbacks.add(DetailedUserReportDto.ReceivedFeedback.builder()
-                .content("test")
-                .userId(81)
-                .build());
-        feedbacks.add(DetailedUserReportDto.ReceivedFeedback.builder()
-                .content("testtest")
-                .userId(82)
-                .build());
-
         if (!feedbacks.isEmpty()) {
             List<UserProfileDto> profiles = userClient.getProfiles(feedbacks.stream()
                     .map(DetailedUserReportDto.ReceivedFeedback::getUserId)
@@ -104,9 +95,17 @@ public class UserReportService {
             });
         }
 
+        int count = dateFilteredList.size();
+
+        // 평균 작업
+        effect.setEnergy(effect.getEnergy() / count);
+        effect.setStable(effect.getStable() / count);
+        effect.setStress(effect.getStress() / count);
+        effect.setRelation(effect.getRelation() / count);
+
         return DetailedUserReportDto.builder()
                 .date(date)
-                .count(dateFilteredList.size())
+                .count(count)
                 .effect(effect)
                 .receivedEmoticons(emoticons)
                 .remainedSentences(sentences)
