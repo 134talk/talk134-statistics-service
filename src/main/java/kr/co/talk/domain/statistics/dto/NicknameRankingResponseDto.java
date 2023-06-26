@@ -19,7 +19,7 @@ public class NicknameRankingResponseDto {
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     public static class Type1 {
         private String emotion;
-        private String score;
+        private int score;
     }
 
     @Data
@@ -28,7 +28,7 @@ public class NicknameRankingResponseDto {
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     public static class Type2 {
         private String act;
-        private String score;
+        private int score;
     }
 
     @Data
@@ -37,6 +37,6 @@ public class NicknameRankingResponseDto {
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     public static class Type3 {
         private String status;
-        private String score;
+        private int score;
     }
 }
