@@ -1,11 +1,12 @@
 package kr.co.talk.global.client;
 
+import kr.co.talk.domain.statistics.dto.RequestDto.TeamCodeResponseDto;
+import kr.co.talk.domain.userreport.dto.UserProfileDto;
+import kr.co.talk.global.config.FeignLoggingConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import kr.co.talk.domain.statistics.dto.RequestDto.TeamCodeResponseDto;
-import kr.co.talk.global.config.FeignLoggingConfig;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -16,4 +17,7 @@ public interface UserClient {
 
     @GetMapping("/user/team/profile-code/{teamCode}")
     List<String> getTeamProfileCode(@PathVariable("teamCode") String teamCode);
+
+    @GetMapping("/user/profiles")
+    List<UserProfileDto> getProfiles(@RequestParam String userIds);
 }
