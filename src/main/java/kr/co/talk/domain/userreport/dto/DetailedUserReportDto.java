@@ -1,5 +1,6 @@
 package kr.co.talk.domain.userreport.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,7 +13,7 @@ public class DetailedUserReportDto {
     private LocalDate date;
     private int count;
     private Effect effect;
-    private List<ReceivedEmotion> receivedEmotions;
+    private List<ReceivedEmoticon> receivedEmoticons;
     private List<String> remainedSentences;
     private List<Integer> scores;
     private List<ReceivedFeedback> feedbacks;
@@ -28,14 +29,17 @@ public class DetailedUserReportDto {
 
     @Builder
     @Data
-    public static class ReceivedEmotion {
-        private int code;
+    public static class ReceivedEmoticon {
+        private String name;
         private int count;
     }
 
     @Builder
     @Data
     public static class ReceivedFeedback {
+        @JsonIgnore
+        private long userId;
+
         private String nickname;
         private String profileImgUrl;
         private String content;
