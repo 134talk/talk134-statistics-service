@@ -151,7 +151,7 @@ public class StatisticsService {
         String value = new String();
 
         if (act.equals("t")) {
-            value = "경청을 잘하고, 전체 의견을 조율하는";
+            value = "경청을 잘하고, 의견을 조율하는";
         } else if (act.equals("w")) {
             value = "열정적인 목표 달성과 리더십";
         } else if (act.equals("a")) {
