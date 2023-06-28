@@ -7,11 +7,13 @@ import kr.co.talk.domain.userreport.dto.UserProfileDto;
 import kr.co.talk.domain.userreport.dto.UserReportDateListDto;
 import kr.co.talk.global.client.UserClient;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +41,7 @@ public class UserReportService {
         var list = statisticsRepository.getStatisticsListByTeamCode(teamCode);
         List<StatisticsEntity> dateFilteredList = list.stream()
                 .filter(entity -> entity.getChatroomEndtime().toLocalDate().isEqual(date))
+                .sorted(Comparator.comparing(StatisticsEntity::getChatroomEndtime))
                 .collect(Collectors.toUnmodifiableList());
 
         DetailedUserReportDto.Effect effect = DetailedUserReportDto.Effect.builder().build();
@@ -51,7 +54,7 @@ public class UserReportService {
             entity.getUsers().stream()
                     .filter(users -> users.getUserId() == userId)
                     .forEach(users -> {
-                        sentences.add(users.getSentence());
+                        sentences.add(StringUtils.defaultString(users.getSentence(), ""));
                         scores.add(users.getScore());
                         effect.setEnergy(effect.getEnergy() + users.getStatusEnergy());
                         effect.setRelation(effect.getRelation() + users.getStatusRelation());
