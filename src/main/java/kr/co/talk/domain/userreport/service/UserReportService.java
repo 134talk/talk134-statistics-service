@@ -71,8 +71,6 @@ public class UserReportService {
                     .filter(emoticon -> emoticon.getToUserId() == userId)
                     .collect(Collectors.groupingBy(StatisticsEntity.RoomEmoticon::getEmoticonCode))
                     .forEach((emoticonCode, roomEmoticons) -> {
-                        log.info("emoticonCode emoticonCode {}", emoticonCode);
-                        log.info("roomEmoticons roomEmoticons {}", roomEmoticons.get(0).getEmoticonCode());
                         emoticonList.add(DetailedUserReportDto.ReceivedEmoticon.builder()
                                 .name(emoticonCode.getName())
                                 .count(roomEmoticons.size())
