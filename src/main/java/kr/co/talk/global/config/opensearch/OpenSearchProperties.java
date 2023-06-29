@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class OpenSearchProperties {
     public static final String PREFIX = "opensearch";
 
-    private String host = "";
-    private String username = "";
-    private String password = "";
+    private String host = "localhost";
+    private String username = "username";
+    private String password = "password";
 }
