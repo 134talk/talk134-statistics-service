@@ -37,14 +37,20 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 		
 	implementation 'com.amazonaws:aws-java-sdk-dynamodb:1.12.239'
 	implementation 'com.github.derjust:spring-data-dynamodb:5.1.0'
-		
+
+	// AWS OpenSearch
+	implementation 'org.opensearch.client:opensearch-java:2.4.0'
+	implementation 'org.opensearch.client:opensearch-rest-client:2.5.0'
+	implementation 'jakarta.json:jakarta.json-api:2.0.1'
+
 	// spring cloud config
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation "org.springframework.cloud:spring-cloud-starter-bus-kafka"
-	implementation 'org.springframework.cloud:spring-cloud-config-client'	
+	implementation 'org.springframework.cloud:spring-cloud-config-client'
 }
 
 dependencyManagement {
