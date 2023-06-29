@@ -13,7 +13,7 @@ public class DetailedUserReportDto {
     private LocalDate date;
     private int count;
     private Effect effect;
-    private List<ReceivedEmoticon> receivedEmoticons;
+    private List<List<ReceivedEmoticon>> receivedEmoticons;
     private List<String> remainedSentences;
     private List<Integer> scores;
     private List<ReceivedFeedback> feedbacks;
