@@ -212,8 +212,7 @@ public class DynamoDBCrudTest {
 				.collect(Collectors.groupingBy(RoomEmoticon::getEmoticonCode, Collectors.counting())).entrySet()
 				.stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(3).map(entry -> {
 					ChatlogDetailEmoticon chatlogDetailEmoticon = new ChatlogDetailEmoticon();
-					chatlogDetailEmoticon.setCode(entry.getKey().getCode());
-					chatlogDetailEmoticon.setName(entry.getKey().getName());
+					chatlogDetailEmoticon.setEmoticonName(entry.getKey().getName());
 					chatlogDetailEmoticon.setScore((int) (entry.getValue() * 100 / roomEmoticon.size()));
 					return chatlogDetailEmoticon;
 				}).collect(Collectors.toList());
@@ -243,5 +242,12 @@ public class DynamoDBCrudTest {
 		.build();
 		
 		System.out.println("build:::"+build);
+	}
+	
+	@Test
+	@DisplayName("관리자 개인 리포트 목록 조회")
+	void adminReportSearch() {
+	    String teamCode = "uaCGJl";
+	    List<StatisticsEntity> statisticsListByTeamCode = statisticsRepository.getStatisticsListByTeamCode(teamCode);
 	}
 }

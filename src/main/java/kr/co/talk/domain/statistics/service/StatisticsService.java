@@ -212,8 +212,7 @@ public class StatisticsService {
                 .collect(Collectors.groupingBy(RoomEmoticon::getEmoticonCode, Collectors.counting())).entrySet()
                 .stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(3).map(entry -> {
                     ChatlogDetailEmoticon chatlogDetailEmoticon = new ChatlogDetailEmoticon();
-                    chatlogDetailEmoticon.setCode(entry.getKey().getCode());
-                    chatlogDetailEmoticon.setName(entry.getKey().getName());
+                    chatlogDetailEmoticon.setEmoticonName(entry.getKey().getName());
                     chatlogDetailEmoticon.setScore((int) (entry.getValue() * 100 / roomEmoticon.size()));
                     return chatlogDetailEmoticon;
                 }).collect(Collectors.toList());

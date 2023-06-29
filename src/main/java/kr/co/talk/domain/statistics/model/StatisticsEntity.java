@@ -94,6 +94,10 @@ public class StatisticsEntity {
         private int statusStress;
         private int statusStable;
 
+        private String profileUrl;
+        private String name;
+        private String nickname;
+        
         @DynamoDBAttribute
         @DynamoDBTypeConverted(converter = FeedbackConverter.class)
         private List<Feedback> feedback;

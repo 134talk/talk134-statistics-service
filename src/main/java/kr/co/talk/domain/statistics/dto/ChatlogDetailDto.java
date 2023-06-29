@@ -30,8 +30,7 @@ public class ChatlogDetailDto {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class ChatlogDetailEmoticon {
-		private int code;
-		private String name;
+		private String emoticonName;
 		private int score;
 	}
 	
