@@ -160,6 +160,8 @@ public class UserReportService {
         List<Long> userIdList = userList.stream().map(StatisticsEntity.Users::getUserId).collect(Collectors.toList());
         int userCount = (int) userIdList.stream().filter(c -> Objects.equals(c, searchId)).count();
 
+        int scorePercent = (int) Math.ceil((double) reportDto.getScorePercent() / userCount);
+
         return AdminUserReportDto.builder()
                 .chatCount(userCount)
                 .name(responseDto.getName())
@@ -169,7 +171,7 @@ public class UserReportService {
                 .stressPercent(reportDto.getStressPercent() / userCount)
                 .relationPercent(reportDto.getRelationPercent() / userCount)
                 .receivedEmoticons(emoticons)
-                .scorePercent(reportDto.getScorePercent() / userCount)
+                .scorePercent(scorePercent)
                 .build();
     }
 }
