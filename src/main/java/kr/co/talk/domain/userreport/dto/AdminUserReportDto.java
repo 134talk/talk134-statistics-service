@@ -20,7 +20,7 @@ public class AdminUserReportDto {
     private int relationPercent;
     private int stressPercent;
     private int stablePercent;
-    private List<ReceivedEmoticon> receivedEmoticons;
+    private List<List<ReceivedEmoticon>> receivedEmoticons;
     private int scorePercent;
 
     @Builder
