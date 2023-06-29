@@ -77,7 +77,7 @@ public class StatisticsService {
         for (String key : top3ValuePercentage.keySet()) {
             type1List.add(NicknameRankingResponseDto.Type1.builder()
                     .emotion(emotionValue(key))
-                    .score(top3ValuePercentage.get(key))
+                    .emotionCount(top3ValuePercentage.get(key))
                     .build());
         }
         return type1List;
@@ -90,7 +90,7 @@ public class StatisticsService {
         for (String key : top3ActPercentage.keySet()) {
             type2List.add(NicknameRankingResponseDto.Type2.builder()
                     .act(actValue(key))
-                    .score(top3ActPercentage.get(key))
+                    .actCount(top3ActPercentage.get(key))
                     .build());
         }
         return type2List;
@@ -103,7 +103,7 @@ public class StatisticsService {
         for (String key : top3StatusPercentage.keySet()) {
             type3List.add(NicknameRankingResponseDto.Type3.builder()
                     .status(statusValue(key))
-                    .score(top3StatusPercentage.get(key))
+                    .statusCount(top3StatusPercentage.get(key))
                     .build());
         }
         return type3List;
