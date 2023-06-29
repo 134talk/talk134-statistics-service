@@ -11,4 +11,10 @@ public class RequestDto {
         private String teamCode;
     }
 
+    @Data
+    public static class AdminSearchUserIdResponseDto {
+        private String name;
+        private String nickname;
+    }
+
 }
