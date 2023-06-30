@@ -1,12 +1,15 @@
 package kr.co.talk.domain.userreport.service;
 
+import kr.co.talk.domain.statistics.dto.RequestDto.AdminSearchUserIdResponseDto;
 import kr.co.talk.domain.statistics.model.StatisticsEntity;
 import kr.co.talk.domain.statistics.repository.StatisticsRepository;
+import kr.co.talk.domain.userreport.dto.AdminUserReportDto;
 import kr.co.talk.domain.userreport.dto.DetailedUserReportDto;
 import kr.co.talk.domain.userreport.dto.UserProfileDto;
 import kr.co.talk.domain.userreport.dto.UserReportDateListDto;
 import kr.co.talk.global.client.UserClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +18,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserReportService {
@@ -116,6 +121,57 @@ public class UserReportService {
                 .remainedSentences(sentences)
                 .feedbacks(feedbacks)
                 .scores(scores)
+                .build();
+    }
+
+    public AdminUserReportDto adminGetTeamUserReport(long userId, long searchId, String teamCode) {
+        List<StatisticsEntity> list = statisticsRepository.getStatisticsListByTeamCode(teamCode);
+        AdminSearchUserIdResponseDto responseDto = userClient.adminSearchUser(userId, searchId);
+        AdminUserReportDto reportDto = new AdminUserReportDto();
+
+        List<List<AdminUserReportDto.ReceivedEmoticon>> emoticons = new ArrayList<>();
+        List<AdminUserReportDto.ReceivedEmoticon> emoticonList = new ArrayList<>();
+
+        list.forEach(entity -> {
+            entity.getUsers().stream()
+                    .filter(users -> users.getUserId() == searchId)
+                    .forEach(users -> {
+                        reportDto.setScorePercent(reportDto.getScorePercent() + users.getScore());
+                        reportDto.setEnergyPercent(reportDto.getEnergyPercent() + users.getStatusEnergy());
+                        reportDto.setRelationPercent(reportDto.getRelationPercent() + users.getStatusRelation());
+                        reportDto.setStressPercent(reportDto.getStressPercent() + users.getStatusStress());
+                        reportDto.setStablePercent(reportDto.getStablePercent() + users.getStatusStable());
+                    });
+
+            entity.getRoomEmoticons().stream()
+                    .filter(emoticon -> emoticon.getToUserId() == userId)
+                    .collect(Collectors.groupingBy(StatisticsEntity.RoomEmoticon::getEmoticonCode))
+                    .forEach((emoticonCode, roomEmoticons) -> {
+                        emoticonList.add(AdminUserReportDto.ReceivedEmoticon.builder()
+                                .emoticon(emoticonCode.getName())
+                                .totalCount(roomEmoticons.size())
+                                .build());
+                    });
+
+        });
+
+        emoticons.add(emoticonList);
+        List<StatisticsEntity.Users> userList = statisticsRepository.getUsers(teamCode);
+        List<Long> userIdList = userList.stream().map(StatisticsEntity.Users::getUserId).collect(Collectors.toList());
+        int userCount = (int) userIdList.stream().filter(c -> Objects.equals(c, searchId)).count();
+
+        int scorePercent = (int) Math.ceil((double) reportDto.getScorePercent() / userCount);
+
+        return AdminUserReportDto.builder()
+                .chatCount(userCount)
+                .name(responseDto.getName())
+                .nickname(responseDto.getNickname())
+                .energyPercent(reportDto.getEnergyPercent() / userCount)
+                .stablePercent(reportDto.getStablePercent() / userCount)
+                .stressPercent(reportDto.getStressPercent() / userCount)
+                .relationPercent(reportDto.getRelationPercent() / userCount)
+                .receivedEmoticons(emoticons)
+                .scorePercent(scorePercent)
                 .build();
     }
 }

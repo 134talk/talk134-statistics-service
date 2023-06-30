@@ -1,5 +1,6 @@
 package kr.co.talk.domain.userreport.controller;
 
+import kr.co.talk.domain.userreport.dto.AdminUserReportDto;
 import kr.co.talk.domain.userreport.dto.DetailedUserReportDto;
 import kr.co.talk.domain.userreport.dto.UserReportDateListDto;
 import kr.co.talk.domain.userreport.service.UserReportService;
@@ -41,4 +42,12 @@ public class UserReportController {
         }
         return userReportService.getDetailedUserReport(userId, teamCode, localDate);
     }
+
+    @GetMapping("/admin/user/report/{teamCode}/{searchId}")
+    public AdminUserReportDto getAdminTeamUserReport(@RequestHeader(value = "userId") long userId,
+                                                     @PathVariable(value = "searchId") long searchId,
+                                                     @PathVariable("teamCode") String teamCode) {
+        return userReportService.adminGetTeamUserReport(userId, searchId, teamCode);
+    }
+
 }
