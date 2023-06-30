@@ -159,15 +159,19 @@ public class UserReportService {
         int userCount = (int) userIdList.stream().filter(c -> Objects.equals(c, searchId)).count();
 
         int scorePercent = (int) Math.ceil((double) reportDto.getScorePercent() / userCount);
+        int energyPercent = userCount == 0 ? 0 : reportDto.getEnergyPercent() / userCount;
+        int stablePercent = userCount == 0 ? 0 : reportDto.getStablePercent() / userCount;
+        int stressPercent = userCount == 0 ? 0 : reportDto.getStressPercent() / userCount;
+        int relationPercent = userCount == 0 ? 0 : reportDto.getRelationPercent() / userCount;
 
         return AdminUserReportDto.builder()
                 .chatCount(userCount)
                 .name(responseDto.getName())
                 .nickname(responseDto.getNickname())
-                .energyPercent(reportDto.getEnergyPercent() / userCount)
-                .stablePercent(reportDto.getStablePercent() / userCount)
-                .stressPercent(reportDto.getStressPercent() / userCount)
-                .relationPercent(reportDto.getRelationPercent() / userCount)
+                .energyPercent(energyPercent)
+                .stablePercent(stablePercent)
+                .stressPercent(stressPercent)
+                .relationPercent(relationPercent)
                 .receivedEmoticons(emoticons)
                 .scorePercent(scorePercent)
                 .build();
