@@ -8,6 +8,10 @@ import kr.co.talk.domain.userreport.dto.UserReportDateListDto;
 import kr.co.talk.global.client.UserClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
+import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch._types.FieldValue;
+import org.opensearch.client.opensearch._types.aggregations.AverageAggregation;
+import org.opensearch.client.opensearch.core.SearchResponse;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,11 +24,32 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class UserReportService {
-    private final StatisticsRepository statisticsRepository;
+    private final OpenSearchClient openSearchClient;
     private final UserClient userClient;
 
-    public UserReportDateListDto getUserReportDateList(Long userId, String teamCode) {
-        var list = statisticsRepository.getStatisticsListByTeamCode(teamCode);
+    public UserReportDateListDto getUserReportDateList(Long userId) {
+        String index = "sample-index";
+        String aggName = "1";
+        SearchResponse<Void> response = openSearchClient.search(searchBuilder ->
+                searchBuilder
+                    .index(index)
+                    .size(0)
+                    .query(query -> query
+                        .bool(bool -> bool
+                            .filter(filter -> filter
+                                .term(term -> term
+                                    .field("users.userId")
+                                    .value(FieldValue.of(userId)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                    .aggregations(aggName,
+                        aggs -> aggs
+                            .avg(AverageAggregation.of(avg -> avg
+                                .field(""))))
+                , StatisticsEntity.class);
         var dateSet = list.stream()
                 .filter(entity -> entity.getUsers().stream()
                         .anyMatch(user -> user.getUserId() == userId))

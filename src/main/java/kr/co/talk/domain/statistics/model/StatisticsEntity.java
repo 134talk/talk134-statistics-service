@@ -1,45 +1,23 @@
 package kr.co.talk.domain.statistics.model;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 import kr.co.talk.domain.statistics.dto.EmoticonCode;
 import kr.co.talk.domain.statistics.dto.FeedbackDto;
 import kr.co.talk.domain.statistics.dto.FeedbackDto.Feedback;
-import kr.co.talk.global.constants.AppConstants;
-import kr.co.talk.global.converter.EmoticonConverter;
-import kr.co.talk.global.converter.FeedbackConverter;
-import kr.co.talk.global.converter.KeywordConverter;
-import kr.co.talk.global.converter.LocalDateTimeConverter;
-import kr.co.talk.global.converter.UsersConverter;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-@DynamoDBTable(tableName = AppConstants.TABLE_STATISTICS)
 public class StatisticsEntity {
-    @DynamoDBHashKey
     private long roomId;
 
-    @DynamoDBIndexHashKey(globalSecondaryIndexName = "team-code-idx", attributeName = "teamCode")
     private String teamCode;
 
-
-    @DynamoDBTypeConverted(converter = LocalDateTimeConverter.class)
-    @DynamoDBAttribute(attributeName = "chatroomEndtime")
     private LocalDateTime chatroomEndtime; // 대화방 종료 시간
 
     private List<Users> users = new ArrayList<>();
@@ -48,43 +26,10 @@ public class StatisticsEntity {
 
     private KeywordSet keywordSet;
 
-    @DynamoDBAttribute(attributeName = "chatroomUsers")
-    @DynamoDBTypeConverted(converter = UsersConverter.class)
-    public List<Users> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<Users> users) {
-        this.users = users;
-    }
-
-    @DynamoDBAttribute(attributeName = "emoticons")
-    @DynamoDBTypeConverted(converter = EmoticonConverter.class)
-    public List<RoomEmoticon> getRoomEmoticons() {
-        return roomEmoticons;
-    }
-
-    public void setRoomEmoticons(List<RoomEmoticon> roomEmoticons) {
-        this.roomEmoticons = roomEmoticons;
-    }
-
-    @DynamoDBAttribute(attributeName = "keywordSet")
-    @DynamoDBTypeConverted(converter = KeywordConverter.class)
-    public KeywordSet getKeywordSet() {
-        return keywordSet;
-    }
-
-    public void setKeywordSet(KeywordSet keywordSet) {
-        this.keywordSet = keywordSet;
-    }
-
-
-
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    @DynamoDBDocument
     public static class Users {
         private long userId;
         private String sentence;
@@ -94,8 +39,6 @@ public class StatisticsEntity {
         private int statusStress;
         private int statusStable;
 
-        @DynamoDBAttribute
-        @DynamoDBTypeConverted(converter = FeedbackConverter.class)
         private List<Feedback> feedback;
     }
 
@@ -121,8 +64,6 @@ public class StatisticsEntity {
         private List<Long> keywordCode;
     }
 
-
-
     public void setUsers(FeedbackDto feedbackDto) {
         this.users.add(Users.builder()
                 .userId(feedbackDto.getUserId())
@@ -137,7 +78,7 @@ public class StatisticsEntity {
     }
 
     public void setEmoticonsWithRedis(List<RoomEmoticon> emoticonList) {
-        emoticonList.forEach(emoticon -> this.roomEmoticons.add(emoticon));
+        this.roomEmoticons.addAll(emoticonList);
     }
 
 }

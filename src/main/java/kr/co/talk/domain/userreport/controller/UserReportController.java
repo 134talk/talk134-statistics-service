@@ -17,12 +17,12 @@ import java.time.format.DateTimeParseException;
 public class UserReportController {
     private final UserReportService userReportService;
 
-    @GetMapping("/user/report/{teamCode}")
-    public UserReportDateListDto getUserReportList(@RequestHeader(value = "userId") Long userId, @PathVariable String teamCode) {
+    @GetMapping("/user/report")
+    public UserReportDateListDto getUserReportList(@RequestHeader(value = "userId") Long userId) {
         if (userId == null) {
             throw new CustomException(CustomError.USER_DOES_NOT_EXIST);
         }
-        return userReportService.getUserReportDateList(userId, teamCode);
+        return userReportService.getUserReportDateList(userId);
     }
 
     @GetMapping("/user/report/{teamCode}/{date}")
