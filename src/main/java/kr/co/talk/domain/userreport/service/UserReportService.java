@@ -129,8 +129,7 @@ public class UserReportService {
         AdminSearchUserIdResponseDto responseDto = userClient.adminSearchUser(userId, searchId);
         AdminUserReportDto reportDto = new AdminUserReportDto();
 
-        List<List<AdminUserReportDto.ReceivedEmoticon>> emoticons = new ArrayList<>();
-        List<AdminUserReportDto.ReceivedEmoticon> emoticonList = new ArrayList<>();
+        List<AdminUserReportDto.ReceivedEmoticon> emoticons = new ArrayList<>();
 
         list.forEach(entity -> {
             entity.getUsers().stream()
@@ -147,7 +146,7 @@ public class UserReportService {
                     .filter(emoticon -> emoticon.getToUserId() == userId)
                     .collect(Collectors.groupingBy(StatisticsEntity.RoomEmoticon::getEmoticonCode))
                     .forEach((emoticonCode, roomEmoticons) -> {
-                        emoticonList.add(AdminUserReportDto.ReceivedEmoticon.builder()
+                        emoticons.add(AdminUserReportDto.ReceivedEmoticon.builder()
                                 .emoticon(emoticonCode.getName())
                                 .totalCount(roomEmoticons.size())
                                 .build());
@@ -155,7 +154,6 @@ public class UserReportService {
 
         });
 
-        emoticons.add(emoticonList);
         List<StatisticsEntity.Users> userList = statisticsRepository.getUsers(teamCode);
         List<Long> userIdList = userList.stream().map(StatisticsEntity.Users::getUserId).collect(Collectors.toList());
         int userCount = (int) userIdList.stream().filter(c -> Objects.equals(c, searchId)).count();
