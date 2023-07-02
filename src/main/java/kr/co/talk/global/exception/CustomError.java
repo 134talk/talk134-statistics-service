@@ -14,7 +14,8 @@ public enum CustomError {
 
     // 공통
     SERVER_ERROR(3000, "알수 없는 문제가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value()),
-    FEIGN_ERROR(3001, "다른 API 호출에 실패하였습니다.", HttpStatus.BAD_GATEWAY.value());
+    FEIGN_ERROR(3001, "다른 API 호출에 실패하였습니다.", HttpStatus.BAD_GATEWAY.value()),
+	KAFKA_ERROR(3003, "이벤트 발행에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
 
     private int errorCode;
     private String message;

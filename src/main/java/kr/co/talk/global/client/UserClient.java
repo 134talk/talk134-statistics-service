@@ -21,7 +21,7 @@ public interface UserClient {
     List<String> getTeamProfileCode(@PathVariable("teamCode") String teamCode);
 
     @GetMapping("/user/profiles")
-    List<UserProfileDto> getProfiles(@RequestParam String userIds);
+    List<UserProfileDto> getProfiles(@RequestParam("userIds") String userIds);
 
     @GetMapping( "/user/admin/search/{searchId}")
     AdminSearchUserIdResponseDto adminSearchUser(@RequestHeader(value = "userId") long userId, @PathVariable(name = "searchId") long searchId);
