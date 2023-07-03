@@ -49,7 +49,7 @@ public class StatisticsConsumer {
 	
 	private final KafkaTemplate<String, String> kafkaTemplate;
 
-	@KafkaListener(topics = KafkaConstants.TOPIC_END_CHATTING, groupId = KafkaConstants.GROUP_STATISTICS, containerFactory = "concurrentKafkaListenerContainerFactory")
+	@KafkaListener(topics = KafkaConstants.TOPIC_END_CHATTING, groupId = "${spring.kafka.group}", containerFactory = "concurrentKafkaListenerContainerFactory")
 	public void endChatting(String kafkaMessage, Acknowledgment ack) throws JsonProcessingException {
 		log.info("Received Msg statistics server, message : {}", kafkaMessage);
 
@@ -91,7 +91,7 @@ public class StatisticsConsumer {
 				}
 			}
 
-			long decrement = redisService.decreaseValue(roomId + RedisConstants.COUNT); 
+			long decrement = redisService.decreaseValue(String.valueOf(roomId));
 			
 			if(decrement == 0) {
 				// 채팅방에 있는 유저들이 모두 feedback을 했는지 check하기 위해

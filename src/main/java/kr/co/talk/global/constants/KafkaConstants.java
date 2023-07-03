@@ -5,7 +5,4 @@ public class KafkaConstants {
 	public static final String TOPIC_END_CHATTING = "end_chatting";
 	// 대화 삭제 topic
 	public static final String TOPIC_REMOVE_CHATTING = "remove_chatting";
-
-	// group id
-	public static final String GROUP_STATISTICS = "statistics";
 }
