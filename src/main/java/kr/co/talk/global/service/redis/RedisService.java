@@ -134,15 +134,9 @@ public class RedisService {
         opsForMap.delete(key, fieldKey);
     }
 
-    public void deleteAll(String roomId, long userId) {
-        String questionKey = roomId + "_" + userId + RedisConstants._QUESTION;
-        String emoticonKey = roomId + RedisConstants._ROOM_EMOTICON;
-        String feedbackKey = RedisConstants.FEEDBACK_ + roomId;
-
-        redisTemplate.delete(questionKey);
-        redisTemplate.delete(emoticonKey);
-        opsForMap.delete(feedbackKey, String.valueOf(userId));
+    
+    public long decreaseValue(String roomId) {
+    	return valueOps.decrement(roomId + RedisConstants.COUNT);
     }
-
-
+    
 }
