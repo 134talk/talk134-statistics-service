@@ -2,6 +2,7 @@ package kr.co.talk.global.client;
 
 import kr.co.talk.domain.statistics.dto.RequestDto.AdminSearchUserIdResponseDto;
 import kr.co.talk.domain.statistics.dto.RequestDto.TeamCodeResponseDto;
+import kr.co.talk.domain.statistics.dto.RequestDto.UserInfoDto;
 import kr.co.talk.domain.userreport.dto.UserProfileDto;
 import kr.co.talk.global.config.FeignLoggingConfig;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -25,4 +26,7 @@ public interface UserClient {
 
     @GetMapping( "/user/admin/search/{searchId}")
     AdminSearchUserIdResponseDto adminSearchUser(@RequestHeader(value = "userId") long userId, @PathVariable(name = "searchId") long searchId);
+    
+    @GetMapping("/user/userInfo/{userId}")
+    UserInfoDto userInfo(@PathVariable("userId") long userId);
 }

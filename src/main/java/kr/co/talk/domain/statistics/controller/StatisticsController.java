@@ -37,4 +37,14 @@ public class StatisticsController {
     public ResponseEntity<?> reportChatlog(@PathVariable("teamCode") String teamCode){
         return ResponseEntity.ok(statisticsService.reportChatlog(teamCode));
     }
+    
+    @GetMapping("/admin/report/list/{teamCode}")
+    public ResponseEntity<?> reportList(@PathVariable("teamCode") String teamCode){
+        return ResponseEntity.ok(statisticsService.adminReportList(teamCode));
+    }
+    
+    @GetMapping("/admin/report/search/list/{teamCode}")
+    public ResponseEntity<?> reportListWithSearchName(@PathVariable("teamCode") String teamCode, @RequestParam String searchName){
+        return ResponseEntity.ok(statisticsService.adminReportListWithSearchName(teamCode, searchName));
+    }
 }

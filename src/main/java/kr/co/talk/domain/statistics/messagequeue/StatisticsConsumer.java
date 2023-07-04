@@ -11,11 +11,12 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.talk.domain.statistics.dto.FeedbackDto;
+import kr.co.talk.domain.statistics.dto.RequestDto.TeamCodeResponseDto;
+import kr.co.talk.domain.statistics.dto.RequestDto.UserInfoDto;
 import kr.co.talk.domain.statistics.model.StatisticsEntity;
 import kr.co.talk.domain.statistics.model.StatisticsEntity.KeywordSet;
 import kr.co.talk.domain.statistics.model.StatisticsEntity.RoomEmoticon;
@@ -63,19 +64,19 @@ public class StatisticsConsumer {
 			FeedbackDto feedbackDto = (FeedbackDto) redisService.getValueByMap(RedisConstants.FEEDBACK_ + roomId,
 					String.valueOf(userId), FeedbackDto.class);
 
-			StatisticsEntity loadEntity = dynamoDBMapper.load(StatisticsEntity.class, 48);
+			StatisticsEntity loadEntity = dynamoDBMapper.load(StatisticsEntity.class, roomId);
 
 			if (loadEntity == null) {
 				List<RoomEmoticon> emoticonList = redisService.getEmoticonList(roomId);
 				KeywordSet keywordSet = redisService.getKeywordSet(roomId, userId);
 
-				String teamCode = userClient.findTeamCode(userId).getTeamCode();
-
+				UserInfoDto userInfoDto = userClient.userInfo(userId);
+				
 				StatisticsEntity statisticsEntity = new StatisticsEntity();
 				statisticsEntity.setRoomId(roomId);
-				statisticsEntity.setTeamCode(teamCode);
+				statisticsEntity.setTeamCode(userInfoDto.getTeamCode());
 				statisticsEntity.setChatroomEndtime(endChatroomDTO.localDateTime);
-				statisticsEntity.setUsers(feedbackDto);
+				statisticsEntity.setUsers(feedbackDto, userInfoDto);
 				statisticsEntity.setEmoticonsWithRedis(emoticonList);
 				statisticsEntity.setKeywordSet(keywordSet);
 
@@ -86,7 +87,8 @@ public class StatisticsConsumer {
 						.anyMatch(id -> id == feedbackDto.getUserId());
 
 				if (!alreadyCommitted) {
-					loadEntity.setUsers(feedbackDto);
+				    UserInfoDto userInfoDto = userClient.userInfo(userId);
+					loadEntity.setUsers(feedbackDto, userInfoDto);
 					dynamoDBMapper.save(loadEntity);
 				}
 			}

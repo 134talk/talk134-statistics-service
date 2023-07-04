@@ -12,6 +12,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 import kr.co.talk.domain.statistics.dto.EmoticonCode;
 import kr.co.talk.domain.statistics.dto.FeedbackDto;
 import kr.co.talk.domain.statistics.dto.FeedbackDto.Feedback;
+import kr.co.talk.domain.statistics.dto.RequestDto.UserInfoDto;
 import kr.co.talk.global.constants.AppConstants;
 import kr.co.talk.global.converter.EmoticonConverter;
 import kr.co.talk.global.converter.FeedbackConverter;
@@ -127,9 +128,12 @@ public class StatisticsEntity {
 
 
 
-    public void setUsers(FeedbackDto feedbackDto) {
+    public void setUsers(FeedbackDto feedbackDto, UserInfoDto userInfoDto) {
         this.users.add(Users.builder()
                 .userId(feedbackDto.getUserId())
+                .name(userInfoDto.getUserName())
+                .nickname(userInfoDto.getNickname())
+                .profileUrl(userInfoDto.getProfileUrl())
                 .score(feedbackDto.getScore())
                 .sentence(feedbackDto.getSentence())
                 .statusEnergy(feedbackDto.getStatusEnergy())

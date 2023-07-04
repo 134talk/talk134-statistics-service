@@ -14,5 +14,5 @@ public class AdminReportListDto {
     private String profileUrl;
     private String name;
     private String nickname;
-    private int chatCount;
+    private long chatCount;
 }
