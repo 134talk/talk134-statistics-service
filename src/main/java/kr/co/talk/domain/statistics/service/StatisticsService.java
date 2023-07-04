@@ -11,6 +11,7 @@ import kr.co.talk.domain.statistics.dto.ChatlogDetailDto.ChatlogDetailKeyword;
 import kr.co.talk.global.client.ChatClient;
 import kr.co.talk.global.client.UserClient;
 import org.springframework.stereotype.Service;
+import kr.co.talk.domain.statistics.dto.AdminReportListDto;
 import kr.co.talk.domain.statistics.dto.ChatlogDetailDto;
 import kr.co.talk.domain.statistics.dto.FeedbackReportDetailDto;
 import kr.co.talk.domain.statistics.model.StatisticsEntity;
@@ -239,5 +240,34 @@ public class StatisticsService {
                 .keywordScore(collect2)
                 .questionList(chatClient.keywordName(collect3))
                 .build();
+    }
+    
+    public List<AdminReportListDto> adminReportList(String teamCode) {
+        List<StatisticsEntity> statisticsListByTeamCode =
+                statisticsRepository.getStatisticsListByTeamCode(teamCode);
+        List<Users> userList = statisticsListByTeamCode.stream()
+                .flatMap(se -> se.getUsers().stream()).collect(Collectors.toList());
+
+        // key :: userId, value :: 횟수
+        Map<Long, Long> userIdGroup = userList.stream()
+                .collect(Collectors.groupingBy(Users::getUserId, Collectors.counting()));
+
+        return userList.stream().map(users -> {
+            return AdminReportListDto.builder()
+                    .userId(users.getUserId())
+                    .name(users.getName())
+                    .nickname(users.getNickname())
+                    .profileUrl(users.getProfileUrl())
+                    .chatCount(userIdGroup.get(users.getUserId()))
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    public List<AdminReportListDto> adminReportListWithSearchName(String teamCode,
+            String searchName) {
+        return adminReportList(teamCode).stream()
+                .filter(report -> report.getName().equals(searchName)
+                        || report.getNickname().equals(searchName))
+                .collect(Collectors.toList());
     }
 }

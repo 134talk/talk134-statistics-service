@@ -17,4 +17,12 @@ public class RequestDto {
         private String nickname;
     }
 
+    @Data
+    public static class UserInfoDto {
+        private Long userId;
+        private String teamCode;
+        private String nickname;
+        private String userName;
+        private String profileUrl;
+    }
 }
