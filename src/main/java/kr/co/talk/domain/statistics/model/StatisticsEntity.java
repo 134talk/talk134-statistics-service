@@ -130,7 +130,7 @@ public class StatisticsEntity {
 
     public void setUsers(FeedbackDto feedbackDto, UserInfoDto userInfoDto) {
         this.users.add(Users.builder()
-                .userId(feedbackDto.getUserId())
+                .userId(userInfoDto.getUserId())
                 .name(userInfoDto.getUserName())
                 .nickname(userInfoDto.getNickname())
                 .profileUrl(userInfoDto.getProfileUrl())

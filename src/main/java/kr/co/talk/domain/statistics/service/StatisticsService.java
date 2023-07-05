@@ -248,18 +248,19 @@ public class StatisticsService {
         List<Users> userList = statisticsListByTeamCode.stream()
                 .flatMap(se -> se.getUsers().stream()).collect(Collectors.toList());
 
-        // key :: userId, value :: 횟수
-        Map<Long, Long> userIdGroup = userList.stream()
-                .collect(Collectors.groupingBy(Users::getUserId, Collectors.counting()));
-
-        return userList.stream().map(users -> {
+        Map<Long, List<Users>> userIdGroup = userList.stream()
+      .collect(Collectors.groupingBy(Users::getUserId));
+        
+        return userIdGroup.entrySet().stream().map(entry->{
+            Users user = entry.getValue().get(0);
+            
             return AdminReportListDto.builder()
-                    .userId(users.getUserId())
-                    .name(users.getName())
-                    .nickname(users.getNickname())
-                    .profileUrl(users.getProfileUrl())
-                    .chatCount(userIdGroup.get(users.getUserId()))
-                    .build();
+                  .userId(user.getUserId())
+                  .name(user.getName())
+                  .nickname(user.getNickname())
+                  .profileUrl(user.getProfileUrl())
+                  .chatCount(entry.getValue().size())
+                  .build();
         }).collect(Collectors.toList());
     }
 
