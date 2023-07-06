@@ -45,6 +45,8 @@ public class UserReportService {
     public DetailedUserReportDto getDetailedUserReport(long userId, String teamCode, LocalDate date) {
         var list = statisticsRepository.getStatisticsListByTeamCode(teamCode);
         List<StatisticsEntity> dateFilteredList = list.stream()
+                .filter(entity -> entity.getUsers().stream()
+                        .anyMatch(user -> user.getUserId() == userId))
                 .filter(entity -> entity.getChatroomEndtime().toLocalDate().isEqual(date))
                 .sorted(Comparator.comparing(StatisticsEntity::getChatroomEndtime))
                 .collect(Collectors.toUnmodifiableList());
@@ -79,7 +81,7 @@ public class UserReportService {
             emoticons.add(emoticonList);
             entity.getUsers().forEach(users -> {
                 users.getFeedback().forEach(feedback -> {
-                    if (feedback.getToUserId() == userId) {
+                    if (StringUtils.isNotBlank(feedback.getReview()) && feedback.getToUserId() == userId) {
                         feedbacks.add(DetailedUserReportDto.ReceivedFeedback.builder()
                                 .userId(users.getUserId())
                                 .content(feedback.getReview())
